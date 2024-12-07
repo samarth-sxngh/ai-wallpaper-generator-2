@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['https://texture-ai-bysamarth.vercel.app', 'http://localhost:3000'],
+    origin: ['https://ai-wallpaper-generator-2-myy.vercel.app', 'https://texture-ai-bysamarth.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true
 }));

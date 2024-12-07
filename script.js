@@ -53,13 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 100);
 
-            const response = await fetch('/api/generate-image', {
+            const apiUrl = window.location.hostname === 'localhost' 
+                ? '/api/generate-image'
+                : 'https://ai-wallpaper-generator-2-myy.vercel.app/api/generate-image';
+
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ prompt })
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server error: ${response.status} - ${errorText}`);
+            }
 
             const data = await response.json();
             
