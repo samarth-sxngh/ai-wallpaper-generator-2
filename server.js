@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['https://ai-wallpaper-generator-2-myy.vercel.app', 'https://texture-ai-bysamarth.vercel.app', 'http://localhost:3000'],
+    origin: ['https://texture-ai-bysamarth.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -37,8 +37,6 @@ app.post('/api/generate-image', async (req, res) => {
         }
         
         console.log('Generating image for prompt:', prompt);
-        console.log('Using API URL:', API_URL);
-        console.log('Token (first 10 chars):', API_TOKEN.substring(0, 10) + '...');
         
         const response = await fetch(API_URL, {
             method: "POST",
@@ -59,6 +57,15 @@ app.post('/api/generate-image', async (req, res) => {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API Error:', response.status, errorText);
+            
+            // Check for rate limit error
+            if (errorText.includes('rate limit exceeded')) {
+                return res.status(429).json({
+                    success: false,
+                    error: 'Rate limit exceeded. Please try again in about an hour.'
+                });
+            }
+            
             throw new Error(`API error: ${response.status} - ${errorText}`);
         }
 

@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const apiUrl = window.location.hostname === 'localhost' 
                 ? '/api/generate-image'
-                : 'https://ai-wallpaper-generator-2-myy.vercel.app/api/generate-image';
+                : 'https://texture-ai-bysamarth.vercel.app/api/generate-image';
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -66,8 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error: ${response.status} - ${errorText}`);
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+                if (response.status === 429) {
+                    throw new Error('Rate limit exceeded. Please try again in about an hour.');
+                }
+                throw new Error(errorData.error || `Server error: ${response.status}`);
             }
 
             const data = await response.json();
@@ -96,8 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             clearInterval(progressInterval);
-            alert(error.message || 'Failed to generate image. Please try again.');
+            alert(error.message);
             progressContainer.classList.remove('active');
+            updateProgress(0);
         }
     }
 
