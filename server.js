@@ -37,6 +37,9 @@ app.post('/api/generate-image', async (req, res) => {
         }
         
         console.log('Generating image for prompt:', prompt);
+        console.log('Using API URL:', API_URL);
+        console.log('Token (first 10 chars):', API_TOKEN.substring(0, 10) + '...');
+        
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
@@ -51,6 +54,8 @@ app.post('/api/generate-image', async (req, res) => {
             })
         });
 
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API Error:', response.status, errorText);
@@ -58,7 +63,10 @@ app.post('/api/generate-image', async (req, res) => {
         }
 
         const buffer = await response.buffer();
+        console.log('Received buffer of size:', buffer.length);
+        
         const base64Image = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+        console.log('Successfully converted to base64');
 
         res.json({
             success: true,
