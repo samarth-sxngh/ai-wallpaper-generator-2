@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="AI Wallpaper Generator - Transform your ideas into beautiful wallpapers"
+    />
+    <title>AI Wallpaper Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="theme-toggle">
+        <span>🌞</span>
+        <label class="switch">
+          <input type="checkbox" id="themeToggle" checked>
+          <span class="slider round"></span>
+        </label>
+        <span>🌙</span>
+      </div>
+
+      <h1>From Text to Texture:<br>Craft Your Perfect Wallpaper</h1>
+      <p class="subtitle">Transform Words into Art</p>
+
+      <div class="input-container">
+        <input type="text" id="promptInput" placeholder="Describe your perfect wallpaper...">
+        <button id="generateBtn">Generate</button>
+      </div>
+
+      <div id="result" class="result-container"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

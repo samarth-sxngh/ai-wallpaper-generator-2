@@ -1,0 +1,8 @@
+.env
+*.pyc
+__pycache__/
+static/generated/
+venv/
+*.json
+!package.json
+node_modules
