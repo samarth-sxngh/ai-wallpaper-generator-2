@@ -8,19 +8,35 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['https://texture-ai-bysamarth.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // Hugging Face API endpoint
 const API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1";
-const API_TOKEN = process.env.HUGGING_FACE_TOKEN || "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";
+const API_TOKEN = process.env.HUGGING_FACE_TOKEN || "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";
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
 
 // Generate image endpoint
-app.post('/generate-image', async (req, res) => {
+app.post('/api/generate-image', async (req, res) => {
     try {
         const { prompt } = req.body;
+        if (!prompt) {
+            return res.status(400).json({
+                success: false,
+                error: 'Prompt is required'
+            });
+        }
         
+        console.log('Generating image for prompt:', prompt);
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
@@ -36,7 +52,9 @@ app.post('/generate-image', async (req, res) => {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('API Error:', response.status, errorText);
+            throw new Error(`API error: ${response.status} - ${errorText}`);
         }
 
         const buffer = await response.buffer();
@@ -51,7 +69,7 @@ app.post('/generate-image', async (req, res) => {
         console.error('Error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to generate image'
+            error: error.message || 'Failed to generate image'
         });
     }
 });
@@ -61,6 +79,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// Export for Vercel
+module.exports = app;
+
+// Start server if not running in Vercel
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 100);
 
-            const response = await fetch('http://localhost:3000/generate-image', {
+            const response = await fetch('/api/generate-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -86,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to generate image. Please try again.');
+            clearInterval(progressInterval);
+            alert(error.message || 'Failed to generate image. Please try again.');
             progressContainer.classList.remove('active');
         }
     }
