@@ -5,19 +5,23 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static('public'));
+
+// Serve static files
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Hugging Face API endpoint
 const API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1";
 const API_TOKEN = process.env.HUGGING_FACE_TOKEN || "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";
 
 // Generate image endpoint
-app.post('/generate-image', async (req, res) => {
+app.post('/api/generate-image', async (req, res) => {
     try {
         const { prompt } = req.body;
         
@@ -51,16 +55,22 @@ app.post('/generate-image', async (req, res) => {
         console.error('Error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to generate image'
+            error: error.message
         });
     }
 });
 
-// Serve index.html for all other routes
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Handle 404
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// Only start the server if we're not in a Vercel environment
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}
+
+module.exports = app;

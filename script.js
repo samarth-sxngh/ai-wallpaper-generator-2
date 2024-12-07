@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 100);
 
-            const response = await fetch('http://localhost:3000/generate-image', {
+            const response = await fetch('/api/generate-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
