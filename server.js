@@ -11,8 +11,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// Log all requests
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+});
+
 // Serve static files
 app.get('/', (req, res) => {
+    console.log('Serving index.html');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -22,9 +29,11 @@ const API_TOKEN = process.env.HUGGING_FACE_TOKEN || "hf_BdDTLxmaEBDIEJIRSkYjnNoW
 
 // Generate image endpoint
 app.post('/api/generate-image', async (req, res) => {
+    console.log('Received generate-image request:', req.body);
     try {
         const { prompt } = req.body;
         
+        console.log('Calling Hugging Face API with prompt:', prompt);
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
@@ -40,11 +49,14 @@ app.post('/api/generate-image', async (req, res) => {
         });
 
         if (!response.ok) {
+            const error = await response.text();
+            console.error('Hugging Face API error:', error);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const buffer = await response.buffer();
         const base64Image = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+        console.log('Successfully generated image');
 
         res.json({
             success: true,
@@ -52,7 +64,7 @@ app.post('/api/generate-image', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error generating image:', error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -62,6 +74,7 @@ app.post('/api/generate-image', async (req, res) => {
 
 // Handle 404
 app.use((req, res) => {
+    console.log('404 - Not found:', req.path);
     res.status(404).sendFile(path.join(__dirname, 'index.html'));
 });
 
